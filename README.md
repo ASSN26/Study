@@ -8,20 +8,20 @@
 #### 1.2 解决方法
 首次尝试将指令微调拓展至多模态，**提出了视觉指令微调**，利用 GPT-4 将广泛存在的图文对构建成多模态指令遵循数据。
 
-<img width="333.9" height="210" alt="image" src="images/llava_1.png" />
+<img width="445.2" height="280" alt="image" src="images/llava_1.png" />
 
 > (指令遵循数据的示例，上半部分展示了用于提示 GPT 的上下文，即标题和方框，下半部分展示了三种类型的响应。请注意，视觉图像不用于提示 GPT，在此仅作为参考展示。)
 
 #### 1.3 模型结构
 视觉编码器采用 CLIP（ViT-L/14），将输入图像 $X_v$ 编码成视觉特征 $Z_v=g(X_v)$。连接器采用一个线性层 $W$，将视觉特征 $Z_v$ 转换为语言嵌入标记 $H_v$。LLM 使用 LLaMA2。
 
-<img width="273" height="90" alt="image" src="images/llava_2.png" />
+<img width="364" height="120" alt="image" src="images/llava_2.png" />
 
 #### 1.4 训练设计
 首先，对于每张图像 $X_v$，生成多轮对话数据 $(X_q^1,X_a^1,…,X_q^T,X_a^T)$，其中 $T$ 为总轮数。然后，将它们组织成一个序列，将所有回答视为助手的回复。最后，使用 LLM 原有的自回归训练目标在预测标记上进行指令调优。具体来说，对于长度为 $L$ 的序列，我们通过以下方式计算目标答案的概率 $X_a$:
 
-<img width="383.4" height="36" alt="image" src="images/llava_3.png" />
-<img width="447.6" height="60" alt="image" src="images/llava_4.png" />
+<img width="511.2" height="48" alt="image" src="images/llava_3.png" />
+<img width="596.8" height="80" alt="image" src="images/llava_4.png" />
 
 > (用于训练模型的输入序列，这里仅展示了两轮对话。模型被训练以预测助手的回答以及停止位置，因此在自回归模型中仅使用绿色序列/标记来计算损失。)
 
@@ -46,12 +46,12 @@
 #### 2.3 模型结构
 视觉编码器采用 SigLIP-2，为了适应动态分辨率，采用 2D-RoPE 并根据输入尺寸插值绝对位置嵌入。连接器采用两层 MLP，将视觉编码器输出的 2×2 视觉特征压缩为单个视觉标记，并与 LLM 的隐藏维度对齐，额外的专用模块以支持 DeepStack 机制。LLM 使用 Qwen3。
 
-<img width="419.4" height="240" alt="image" src="images/qwen3vl_1.png" />
+<img width="559.2" height="320" alt="image" src="images/qwen3vl_1.png" />
 
 #### 2.4 训练设计
 预训练分为四个阶段，旨在逐步构建从基本对齐到长上下文理解的能力。
 
-<img width="362.7" height="60" alt="image" src="images/qwen3vl_2.png" />
+<img width="483.6" height="80" alt="image" src="images/qwen3vl_2.png" />
 
 值得注意的是，预训练数据包括：
 
@@ -80,7 +80,9 @@
 #### 1.1 构建训练流程：只训练连接器、lora训练模型
 #### 1.2 记录训练信息：训练显存、训练时间、指标结果
 (1)零样本推理
+
 (2)只训练连接器
+
 (3)lora训练模型
 #### 1.3 分析数据流
 **(1)怎样处理输入**
