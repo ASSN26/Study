@@ -7,7 +7,7 @@
 第二，最近利用机器生成的高质量指令遵循样本来微调LLM大幅提高了zero-shot能力，**指令微调尚未在多模态领域进行尝试**。
 #### 1.2解决方法
 首次尝试将指令微调拓展至多模态，**提出了视觉指令微调**，利用GPT-4将广泛存在的图文对构建成多模态指令遵循数据。
-<img width="316" height="199" alt="image" src="https://github.com/user-attachments/assets/b38009fb-a0dd-4d31-a325-c48e97876208" />
+<img width="316" height="199" alt="image" src="images/llava_1.png" />
 > (指令遵循数据的示例，上半部分展示了用于提示GPT的上下文，即标题和方框，下半部分展示了三种类型的响应。请注意，视觉图像不用于提示GPT，在此仅作为参考展示。)
 
 ### 2. Qwen3VL
