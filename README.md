@@ -46,12 +46,12 @@
 #### 2.3 模型结构
 视觉编码器采用 SigLIP-2，为了适应动态分辨率，采用 2D-RoPE 并根据输入尺寸插值绝对位置嵌入。连接器采用两层 MLP，将视觉编码器输出的 2×2 视觉特征压缩为单个视觉标记，并与 LLM 的隐藏维度对齐，额外的专用模块以支持 DeepStack 机制。LLM 使用 Qwen3。
 
-<img width="419.4" height="240" alt="image" src="images/llava_5.png" />
+<img width="419.4" height="240" alt="image" src="images/qwen3vl_1.png" />
 
 #### 2.4 训练设计
 预训练分为四个阶段，旨在逐步构建从基本对齐到长上下文理解的能力。
 
-<img width="362.7" height="60" alt="image" src="images/llava_6.png" />
+<img width="362.7" height="60" alt="image" src="images/qwen3vl_2.png" />
 
 值得注意的是，预训练数据包括：
 
