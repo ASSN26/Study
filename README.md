@@ -130,10 +130,10 @@ inputs = processor(text=[text], images=image_inputs, videos=video_inputs, do_res
 ```
 输出例如：
 ```python
-inputs["input_ids"][0]：文本Token_ID，例如[151644, 8948, 151646, ...]。注意，原本代表图片的占位符文本，在这里已经被替换成了模型专门用于
-                        表示图像 Patch 的特定 Token_ID。
-inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]。长度与 input_ids 相同，标记哪些是真实的输入 Token(1)，哪些是为了补齐长度而
-                             填充的 Padding Token(0)。注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
+inputs["input_ids"][0]：文本Token_ID，例如[151644, 8948, 151646, ...]。注意，原本代表图片的占位符文本，在这里
+                        已经被替换成了模型专门用于表示图像 Patch 的特定 Token_ID。
+inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]。长度与 input_ids 相同，标记哪些是真实的输入 Token(1)，
+                             哪些是为了补齐长度而填充的 Padding Token(0)。注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
 inputs["pixel_values"]：纯图像像素 Tensor。
 inputs["image_grid_thw"][0]：记录视觉输入尺寸的三维网格，T(时间，即帧数，图片为 1)、H(高度的 Patch 数)、W(宽度的 Patch 数)。
 ```
