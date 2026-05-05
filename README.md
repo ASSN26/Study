@@ -13,7 +13,7 @@
 > (指令遵循数据的示例，上半部分展示了用于提示 GPT 的上下文，即标题和方框，下半部分展示了三种类型的响应。请注意，视觉图像不用于提示 GPT，在此仅作为参考展示。)
 
 #### 1.3 模型结构
-视觉编码器采用 CLIP（ViT-L/14），将输入图像 $X_v$ 编码成视觉特征 $Z_v=g(X_v)$。连接器采用一个线性层 $W$，将视觉特征 $Z_v$ 转换为语言嵌入标记 $H_v$。LLM 使用 LLaMA2。
+视觉编码器采用 CLIP(ViT-L/14)，将输入图像 $X_v$ 编码成视觉特征 $Z_v=g(X_v)$。连接器采用一个线性层 $W$，将视觉特征 $Z_v$ 转换为语言嵌入标记 $H_v$。LLM 使用 LLaMA2。
 
 <img width="364" height="120" alt="image" src="images/llava_2.png" />
 
@@ -27,7 +27,7 @@
 
 我们考虑采用两阶段的指令微调过程训练 LLaVA。
 
-**阶段1：特征对齐预训练**。将 CC3M 过滤为 595K 个图文对，转换成简单的指令数据，每个样本都可以视为单轮对话。$Xinstruct$ 要求模型简要描述图像，真实预测答案 $X_a$ 是原始的图像描述。在训练过程中，仅使用可训练参数 $θ=W$（**连接器**）最大化公式 (3) 的似然性。
+**阶段1：特征对齐预训练**。将 CC3M 过滤为 595K 个图文对，转换成简单的指令数据，每个样本都可以视为单轮对话。$Xinstruct$ 要求模型简要描述图像，真实预测答案 $X_a$ 是原始的图像描述。在训练过程中，仅使用可训练参数 $θ=W$(**连接器**) 最大化公式 (3) 的似然性。
 
 **阶段2：端到端微调**。更新 LLaVA 中**连接器和 LLM** 的预训练权重。
 ### 2. Qwen3VL
@@ -105,7 +105,7 @@ messages = [
 将结构化消息转换成特定的纯文本字符串。其中，将图像替换为占位符`<|vision_start|><|image_pad|><|vision_end|>`。
 ```python
 text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-tokenize=False：返回处理好的字符串，不要将其转换成Token ID。
+tokenize=False：返回处理好的字符串，不要将其转换成Token_ID。
 add_generation_prompt=True：在字符串末尾添加一个助手起始符<|im_start|>assistant，引导模型输出。
 ```
 输出例如：
@@ -124,16 +124,16 @@ image_inputs, video_inputs = process_vision_info(messages)
 ```
 <PIL.Image>
 ```
-将纯文本字符串、视觉数据转换成 Tensor。其中，将文本转换成 Token ID，将图像缩放、裁剪、归一化……转换成 Tensor。
+将纯文本字符串、视觉数据转换成 Tensor。其中，将文本转换成 Token_ID，将图像缩放、裁剪、归一化……转换成 Tensor。
 ```python
 inputs = processor(text=[text], images=image_inputs, videos=video_inputs, do_resize=True)
 ```
 输出例如：
 ```python
-inputs["input_ids"][0]：文本Token ID，例如[151644, 8948, 151646, ...]。注意，原本代表图片的占位符文本，在这里已经被替换成了模型专门用于
-                        表示图像 Patch 的特定 Token ID。
-inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]。长度与`input_ids`相同，标记哪些是真实的输入 Token（1），哪些是为了补齐长度而
-                             填充的 Padding Token（0）。注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
+inputs["input_ids"][0]：文本Token_ID，例如[151644, 8948, 151646, ...]。注意，原本代表图片的占位符文本，在这里已经被替换成了模型专门用于
+                        表示图像 Patch 的特定 Token_ID。
+inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]。长度与 input_ids 相同，标记哪些是真实的输入 Token(1)，哪些是为了补齐长度而
+                             填充的 Padding Token(0)。注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
 inputs["pixel_values"]：纯图像像素 Tensor。
 inputs["image_grid_thw"][0]：记录视觉输入尺寸的三维网格，T(时间，即帧数，图片为 1)、H(高度的 Patch 数)、W(宽度的 Patch 数)。
 ```
@@ -167,7 +167,7 @@ labels = ([-100] * len(instruction_input_ids) + response_input_ids)
 
 **(6)怎样处理输出**
 
-模型输出`logits([batch_size, sequence_length, vocab_size])`，提取序列最后一个位置的输出`logits[:, -1, :]`，经过`argmax`和`tokenizer.decode()`后，将 Token ID 转换回文本。
+模型输出`logits([batch_size, sequence_length, vocab_size])`，提取序列最后一个位置的输出`logits[:, -1, :]`，经过`argmax`和`tokenizer.decode()`后，将 Token_ID 转换回文本。
 
 **(7)怎样计算损失**
 
