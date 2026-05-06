@@ -87,7 +87,7 @@
 #### 1.3 分析数据流
 **(1)怎样处理输入**
 
-对于qwen3vl，输入的结构化消息如下。
+①对于qwen3vl，输入的结构化消息如下。
 ```python
 messages = [
         {
@@ -102,7 +102,7 @@ messages = [
         }
     ]
 ```
-将结构化消息转换成特定的纯文本字符串。其中，将图像替换为占位符`<|vision_start|><|image_pad|><|vision_end|>`。
+②将结构化消息转换成特定的纯文本字符串。其中，将图像替换为占位符`<|vision_start|><|image_pad|><|vision_end|>`。
 ```python
 text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 tokenize=False：返回处理好的字符串，不要将其转换成Token_ID。
@@ -113,10 +113,10 @@ add_generation_prompt=True：在字符串末尾添加一个助手起始符<|im_s
 <|im_start|>system
 You are a helpful assistant.<|im_end|>
 <|im_start|>user
-<|vision_start|><|image_pad|><|vision_end|>图片里是什么？<|im_end|>
+<|vision_start|><|image_pad|><|vision_end|>Transcribe the LaTeX of this image.<|im_end|>
 <|im_start|>assistant
 ```
-从结构化消息中提取视觉数据，并将它们转换成统一的格式。
+③从结构化消息中提取视觉数据。
 ```python
 image_inputs, video_inputs = process_vision_info(messages)
 ```
@@ -124,28 +124,31 @@ image_inputs, video_inputs = process_vision_info(messages)
 ```
 <PIL.Image>
 ```
-将纯文本字符串、视觉数据转换成 Tensor。其中，将文本转换成 Token_ID，将图像缩放、裁剪、归一化……转换成 Tensor。
+④将纯文本字符串、视觉数据转换成 Tensor。其中，将文本转换成 Token_ID，将图像缩放、裁剪、归一化……转换成 Tensor。
 ```python
 inputs = processor(text=[text], images=image_inputs, videos=video_inputs, do_resize=True)
 ```
 输出例如：
 ```python
-inputs["input_ids"][0]：文本Token_ID，例如[151644, 8948, 151646, ...]。注意，原本代表图片的占位符文本，在这里
-                        已经被替换成了模型专门用于表示图像 Patch 的特定 Token_ID。
-inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]。长度与 input_ids 相同，标记哪些是真实的输入 Token(1)，
-                             哪些是为了补齐长度而填充的 Padding Token(0)。注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
-inputs["pixel_values"]：纯图像像素 Tensor。
-inputs["image_grid_thw"][0]：记录视觉输入尺寸的三维网格，T(时间，即帧数，图片为 1)、H(高度的 Patch 数)、W(宽度的 Patch 数)。
+inputs["input_ids"][0]：文本Token_ID，例如[151644, 8948, 198, ...]，len=37。
+                        注意，原本代表图片的占位符文本，在这里已经被替换成了模型专门用于表示图像 Patch 的特定 Token_ID。
+inputs["attention_mask"][0]：输入掩码，例如[1, 1, 1, ...]，len=37。
+                             用来标记哪些是真实的输入 Token(1)，哪些是为了补齐长度而填充的 Padding Token(0)。
+                             注意，在此步骤通常全是 1，后续 DataCollator 中才会出现 0。
+inputs["pixel_values"]：纯图像像素 Tensor，例如shape=(32, 1176)。
+inputs["image_grid_thw"][0]：记录视觉输入尺寸的三维网格，例如array([1, 4, 8])。
+                             其中，T(时间，即帧数，图片为 1)、H(高度的 Patch 数)、W(宽度的 Patch 数)。
+inputs['mm_token_type_ids'][0]：例如[0, ..., 1, ..., 0]，len=37。
 ```
 **(2)怎样构建标签**
 
-单独对目标文本进行分词和编码。
+①单独将目标文本转换成 Tensor。
 ```python
 response = tokenizer(f"{output_content}", add_special_tokens=False)
 response_input_ids = response["input_ids"]
 response_attention_mask = response.get("attention_mask", [1] * len(response_input_ids))
 ```
-添加结束符，使模型学会输出目标文本后停止。
+②添加结束符`<|im_end|>`，使模型学会输出目标文本后停止。
 ```python
 eos_token_id = tokenizer.eos_token_id
 if eos_token_id is not None:
@@ -153,7 +156,7 @@ if eos_token_id is not None:
         response_input_ids = response_input_ids + [eos_token_id]
         response_attention_mask = response_attention_mask + [1]
 ```
-将用户输入和目标文本拼接在一起，形成一条完整的对话序列。用`[-100]`把用户输入（题目）掩码，使模型不学习预测这部分。
+③将用户输入和目标文本拼接在一起，形成一条完整的对话序列。用`[-100]`把用户输入（题目）掩码，使模型不学习预测这部分。
 ```python
 input_ids = instruction_input_ids + response_input_ids
 attention_mask = instruction_attention_mask + response_attention_mask
