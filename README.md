@@ -170,13 +170,31 @@ labels = ([-100] * len(instruction_input_ids) + response_input_ids)
 
 Qwen 采用 Next-Token Prediction（下一个词预测）任务，使用交叉熵损失来计算。实际上，在训练过程中，模型通常可直接计算并输出 loss，无需手动计算损失。
 #### 1.2 构建训练流程：只训练连接器、lora训练模型
-相关代码在qwen3vl/qwen3vl_ppft和qwen3vl/qwen3vl_lora。
+相关代码在`qwen3vl/qwen3vl_ppft`和`qwen3vl/qwen3vl_lora`。
 #### 1.3 记录训练信息：训练显存、训练时间、指标结果
-(1)零样本推理
+```python
+信息
+data_dir："../../Datas/LaTeX_OCR/human_handwrite_print_format"
+data_fraction：0.5
+per_device_train_batch_size：8
+learning_rate：1e-4
+num_train_epochs:5
 
-(2)只训练连接器
+lora信息
+lora微调模型的参数：["q_proj", "k_proj", "v_proj", "o_proj"]
+lora_rank：128
+lora_alpha：16
+lora_dropout：0
 
-(3)lora训练模型
+ppft信息
+可训练参数关键词列表：["visual.merger"]
+```
+| 方法 | 训练显存 | 训练时间 | 测试集损失(最好) |
+| :--- | :--- | :--- | :--- |
+| qwen2.5vl_lora | 16204 M | 369.9 s | 0.002241 |
+| qwen2.5vl_ppft | 15106 M | 291.2 s | 0.004547 |
+| qwen3vl_lora | 18060 M | 1124.0 s | 0.002277 |
+| qwen3vl_ppft | 17154 M | 1159.0 s | 0.002815 |
 
 #### 2.VLM常见问题排查手册
 # 第二章 VLM进阶学习计划
