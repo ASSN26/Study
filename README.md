@@ -9,7 +9,7 @@
 #### 1.2 解决方法
 首次尝试将指令微调拓展至多模态，**提出了视觉指令微调**，利用 GPT-4 将广泛存在的图文对构建成多模态指令遵循数据。
 
-<img width="445.2" height="280" alt="image" src="images_1/llava_1.png" />
+<img width="445.2" height="280" alt="image" src="images_1/llava_1.png" /> <!--截图在WPS的Word里，调整好尺寸，×40就是这里的width和height-->
 
 > (指令遵循数据的示例，上半部分展示了用于提示 GPT 的上下文，即标题和方框，下半部分展示了三种类型的响应。请注意，视觉图像不用于提示 GPT，在此仅作为参考展示。)
 
