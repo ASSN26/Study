@@ -1,0 +1,62 @@
+训练数据大小: 600
+测试数据大小: 70
+
+================================================================================
+可训练参数关键词:  ['visual.merger']
+匹配的可训练参数: 5
+[Trainable] model.visual.merger.ln_q.weight
+[Trainable] model.visual.merger.mlp.0.weight
+[Trainable] model.visual.merger.mlp.0.bias
+[Trainable] model.visual.merger.mlp.2.weight
+[Trainable] model.visual.merger.mlp.2.bias
+--------------------------------------------------------------------------------
+可训练参数量: 36,708,608
+总参数量: 3,754,622,976
+可训练参数占比: 0.9777%
+================================================================================
+
+{'loss': '0.7535', 'grad_norm': '1.07', 'learning_rate': '0.0001', 'epoch': '0.01333'}                                                                                           
+{'loss': '0.3254', 'grad_norm': '0.5039', 'learning_rate': '9.493e-05', 'epoch': '0.2667'}                                                                                       
+{'loss': '0.1062', 'grad_norm': '0.293', 'learning_rate': '8.96e-05', 'epoch': '0.5333'}                                                                                         
+{'loss': '0.04697', 'grad_norm': '0.3984', 'learning_rate': '8.427e-05', 'epoch': '0.8'}                                                                                         
+{'eval_loss': '0.01025', 'eval_runtime': '2.72', 'eval_samples_per_second': '25.73', 'eval_steps_per_second': '3.308', 'epoch': '1'}                                             
+{'loss': '0.02609', 'grad_norm': '0.293', 'learning_rate': '7.893e-05', 'epoch': '1.067'}                                                                                        
+{'loss': '0.01754', 'grad_norm': '0.2041', 'learning_rate': '7.36e-05', 'epoch': '1.333'}                                                                                        
+{'loss': '0.01626', 'grad_norm': '0.0415', 'learning_rate': '6.827e-05', 'epoch': '1.6'}                                                                                         
+{'loss': '0.0105', 'grad_norm': '0.25', 'learning_rate': '6.293e-05', 'epoch': '1.867'}                                                                                          
+{'eval_loss': '0.005238', 'eval_runtime': '2.734', 'eval_samples_per_second': '25.61', 'eval_steps_per_second': '3.292', 'epoch': '2'}                                           
+{'loss': '0.008378', 'grad_norm': '0.2539', 'learning_rate': '5.76e-05', 'epoch': '2.133'}                                                                                       
+{'loss': '0.007238', 'grad_norm': '0.08789', 'learning_rate': '5.227e-05', 'epoch': '2.4'}                                                                                       
+{'loss': '0.008401', 'grad_norm': '0.07812', 'learning_rate': '4.693e-05', 'epoch': '2.667'}                                                                                     
+{'loss': '0.01053', 'grad_norm': '0.2168', 'learning_rate': '4.16e-05', 'epoch': '2.933'}                                                                                        
+{'eval_loss': '0.004899', 'eval_runtime': '2.811', 'eval_samples_per_second': '24.9', 'eval_steps_per_second': '3.201', 'epoch': '3'}                                            
+{'loss': '0.009595', 'grad_norm': '0.1514', 'learning_rate': '3.627e-05', 'epoch': '3.2'}                                                                                        
+{'loss': '0.007733', 'grad_norm': '0.248', 'learning_rate': '3.093e-05', 'epoch': '3.467'}                                                                                       
+{'loss': '0.00669', 'grad_norm': '0.1089', 'learning_rate': '2.56e-05', 'epoch': '3.733'}                                                                                        
+{'loss': '0.006805', 'grad_norm': '0.01978', 'learning_rate': '2.027e-05', 'epoch': '4'}                                                                                         
+{'eval_loss': '0.004233', 'eval_runtime': '2.873', 'eval_samples_per_second': '24.37', 'eval_steps_per_second': '3.133', 'epoch': '4'}                                           
+{'loss': '0.007087', 'grad_norm': '0.1069', 'learning_rate': '1.493e-05', 'epoch': '4.267'}                                                                                      
+{'loss': '0.005885', 'grad_norm': '0.03906', 'learning_rate': '9.6e-06', 'epoch': '4.533'}                                                                                       
+{'loss': '0.007365', 'grad_norm': '0.04248', 'learning_rate': '4.267e-06', 'epoch': '4.8'}                                                                                       
+{'eval_loss': '0.004046', 'eval_runtime': '3.271', 'eval_samples_per_second': '21.4', 'eval_steps_per_second': '2.752', 'epoch': '5'}                                            
+{'train_runtime': '302.5', 'train_samples_per_second': '9.917', 'train_steps_per_second': '1.24', 'train_loss': '0.03524', 'epoch': '5'}
+
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.76.05              Driver Version: 580.76.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA vGPU-32GB               On  |   00000000:31:00.0 Off |                  N/A |
+| 81%   52C    P2            150W /  320W |   15114MiB /  32760MiB |     84%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A            6812      C   python                                15106MiB |
++-----------------------------------------------------------------------------------------+

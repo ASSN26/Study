@@ -1,0 +1,6 @@
+accelerate==1.13.0
+datasets==4.2.0
+peft==0.19.1
+qwen-vl-utils==0.0.14
+tokenizers==0.22.1
+transformers==5.7.0
