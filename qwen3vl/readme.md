@@ -19,4 +19,4 @@
 
 模型采用 Qwen2.5-VL-3B-Instruct 或 Qwen3-VL-2B-Instruct
 
-LoRA 微调代码在 qwen3vl_lora 中，配置好参数后运行 `train.py` 即可。类似，部分参数（多模态投影层）微调代码在 qwen3vl_lora 中，配置好参数后运行 `train.py` 即可。
+LoRA 微调代码在 qwen3vl_lora 中，配置好参数后运行 `train.py` 即可。类似，部分参数（多模态投影层）微调代码在 qwen3vl_ppft 中，配置好参数后运行 `train.py` 即可。
