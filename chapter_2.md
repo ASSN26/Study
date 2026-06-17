@@ -37,6 +37,32 @@ $\hat{\mathbb{E}}_t$：表示在一个 Batch 的数据上求平均值。
 | 价值模型 | prompt+部分回答 | 一个具体的数值 | $L^{MSE}$ |
 | 奖励模型 | prompt+完整回答 | 一个具体的数值 | 不训练 |
 
+> 策略梯度方法的局限性：步长极难控制，过大则新策略可能会崩溃，过小则训练缓慢。
+
+(2)信赖域方法（Trust Region Methods）
+
+(2.1)为了解决策略梯度方法的步长问题，提出代理目标函数
+
+$$\text{maximize}_\theta \hat{\mathbb{E}}_t \left[ \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)} \hat{A}_t \right]$$
+
+$$\text{subject to } \hat{\mathbb{E}}_t [\text{KL}[\pi_{\theta_{\text{old}}}(\cdot \mid s_t), \pi_\theta(\cdot \mid s_t)]] \le \delta$$
+
+其中， 
+
+$\frac{\pi_\theta}{\pi_{\theta_{\text{old}}}}$：“新策略下执行该动作的概率”除以“旧策略下执行该动作的概率”。
+
+KL 散度约束：新旧策略的概率分布之间的 KL 散度必须小于等于“信任区域” $\delta$。
+
+> 信赖域方法局限性：这个带约束的优化问题计算复杂度非常高，在 LLM 中难以落地。
+
+(2.2)若利用拉格朗日乘数法，可以将上述转化成无约束优化问题
+
+$$\text{maximize}_\theta \hat{\mathbb{E}}_t \left[ \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)} \hat{A}_t - \beta \text{KL}[\pi_{\theta_{\text{old}}}(\cdot \mid s_t), \pi_\theta(\cdot \mid s_t)] \right]$$
+
+理论上，这个公式构成了策略性能的下界，优化这个下界，就能保证策略越变越好。
+
+> 信赖域方法局限性：实际应用中，找不到一个固定的 $\beta$ 可以适用于不同的问题。
+
 #### 1.2 解决方法
 #### 1.3 模型结构
 #### 1.4 训练设计
