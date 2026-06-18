@@ -64,6 +64,31 @@ $$\text{maximize}_\theta \hat{\mathbb{E}}_t \left[ \frac{\pi_\theta(a_t \mid s_t
 > 信赖域方法局限性：实际应用中，找不到一个固定的 $\beta$ 可以适用于不同的问题。
 
 #### 1.2 解决方法
+(1)为了解决上述背景方法的局限性，提出具有裁剪的代理目标函数
+
+$$L^{CLIP}(\theta) = \hat{\mathbb{E}}_t [\min(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon)\hat{A}_t)]$$
+
+$$r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$$
+
+<img width="480" height="218" alt="image" src="study/images/chapter_2/ppo_1.png" /> <!--截图在WPS的Word里，调整好尺寸，×40就是这里的width和height-->
+
+> 我们希望，<br>
+$\hat{A}_t>0$且 $r_t(\theta)$在 $(0, 1+\epsilon)$时，模型正常更新<br>
+$\hat{A}_t>0$且 $r_t(\theta)$在 $(1+\epsilon, +\infty)$时，模型停止更新<br>
+$\hat{A}_t<0$且 $r_t(\theta)$在 $(1-\epsilon, +\infty)$时，模型正常更新<br>
+$\hat{A}_t<0$且 $r_t(\theta)$在 $(0, 1-\epsilon)$时，模型停止更新<br>
+这就需要，<br>
+clip函数限制步长，划定信任域：<br>
+$\hat{A}_t>0$且 $r_t(\theta)>1+\epsilon$变为常数，梯度变0，从而停止更新<br>
+$\hat{A}_t<0$且 $r_t(\theta)<1-\epsilon$变为常数，梯度变0，从而停止更新<br>
+min函数确保更新，构建悲观下界：<br>
+$\hat{A}_t>0$且 $r_t(\theta)<1-\epsilon$不为常数，从而确保更新<br>
+$\hat{A}_t<0$且 $r_t(\theta)>1+\epsilon$不为常数，从而确保更新<br>
+
+<img width="584.4" height="206.4" alt="image" src="study/images/chapter_2/ppo_2.png" />
+
+> 展示了随着策略更新步长的增加，各个目标函数的变化。可以观察到，红线（ $L^{CLIP}$）始终处于橙线（ $L^{CPI}$）的下方。当更新步长过大导致 KL 散度（蓝线）飙升时， $L^{CLIP}$ 会迅速转为下降，从而阻止更新幅度过大。
+
 #### 1.3 模型结构
 #### 1.4 训练设计
 
