@@ -90,6 +90,37 @@ $\hat{A}_t<0$且 $r_t(\theta)>1+\epsilon$不为常数，从而确保更新<br>
 > 展示了随着策略更新步长的增加，各个目标函数的变化。可以观察到，红线（ $L^{CLIP}$）始终处于橙线（ $L^{CPI}$）的下方。当更新步长过大导致 KL 散度（蓝线）飙升时， $L^{CLIP}$ 会迅速转为下降，从而阻止更新幅度过大。
 
 #### 1.3 模型结构
+在深度强化学习中，通常使用 Actor-Critic 架构。Actor 即策略模型 $\pi_\theta(a_t | s_t)$，Critic 即价值模型 $V(s_t)$。
+
+为了节省算力和显存，实际通常让策略模型和价值模型共享神经网络的底层参数，只在最后一层分出两个头分别输出概率分布和价值评分。
+
+因此，目标函数为
+
+$$
+L^{CLIP+VF+S}_t(\theta) = \hat{\mathbb{E}}_t \left[ L_t^{CLIP}(\theta) - c_1 L_t^{VF}(\theta) + c_2 S \left[ \pi_\theta \right] (s_t) \right]
+$$
+
+其中，
+
+$L^{CLIP}(\theta)$：策略目标，负责优化策略模型。
+
+$- c_1 L^{VF}(\theta)$：价值损失，价值模型预测的价值 $V_\theta(s_t)$ 与真实回报 $V_t^{\text{targ}}$ 之间的均方误差 (MSE)。
+
+$+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布的熵，越大则策略越随机。此项是为了鼓励探索，防止模型过早陷入局部最优。
+
+优势函数通常使用 GAE (广义优势估计)，先计算 TD Error（时序差分误差） $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$，然后用一个衰减系数 $(\gamma\lambda)$ 把所有的 TD Error 加权求和。
+
 #### 1.4 训练设计
+`for iteration = 1, 2, ... do`：训练迭代
+
+（数据收集阶段）
+* `for actor = 1, 2, ..., N do`：同时输入 $N$个prompt
+* `Run policy... for T timesteps`：用当前的旧策略 $\theta_{\text{old}}$ 在环境里运行 $T$ 步，收集数据（状态、动作、奖励）。
+*   `Compute advantage estimates`：用 GAE 方法计算这批数据中每一步的优势值 $\hat{A}_t$。
+
+（模型优化阶段）
+* 将收集的 $N \times T$ 个数据打包。
+* 使用 Minibatch SGD/Adam 根据目标函数反复训练 $K$ 个 Epoch
+* 把更新后的参数 $\theta$ 赋值给 $\theta_{\text{old}}$，准备进入下一轮循环。
 
 ##二、模型实践
