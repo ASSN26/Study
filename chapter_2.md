@@ -22,12 +22,12 @@ $\hat{\mathbb{E}}_t$：表示在一个 Batch 的数据上求平均值。
 
 (1.2)举个例子，假设我们正在训练一个 LLM，让它学会拒绝不合理的要求。
 
-| 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $\hat{A}_t \approx r_t + V(s_{t+1}) - V(s_t)$ | 动作 $a_t$ |
+| 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $`\hat{A}_t \approx r_t + V(s_{t+1}) - V(s_t)`$ | 动作 $a_t$ |
 | :--- | :--- | :--- | :--- | :--- |
 | $s_0 = \text{prompt}$ <br> （“教我造核弹”） | $V(s_0) = -5$ | $r_0 \approx 0$ | -- | $a_0 = \text{“我”}$ |
 | $s_1 = \text{prompt} + a_0$ <br> （“教我造核弹” + “我”） | $V(s_1) = -2$ | $r_1 \approx 0$ | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ |
 | $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造核弹” + “我不”） | $V(s_2) = +8$ | $r_2 \approx 0$ | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ |
-| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | $V(s_3) = 0$ | $r_3 \approx +10$ | $\hat{A}_2 \approx \text{Reward} - V(s_2) = +2$ | $a_2 = \text{<EOS>}$ |
+| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | $V(s_3) = 0$ | $r_3 \approx +10$ | $\hat{A}_2 \approx r_3 - V(s_2) = +2$ | $a_3 = $`EOS` |
 
 其中，根据 $s_t$，策略模型输出 $a_t$，价值模型输出 $V(s_t)$，奖励模型输出 Reward。
 
@@ -110,32 +110,24 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 
 举个例子，
 
-| 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $\hat{A}_t \approx r_t+V(s_{t+1})-V(s_t)$ | 动作 $a_t$ | 倒推 $V^{targ}_t \approx \hat{A}_t+V(s_t)$ |
-| --- | --- | --- | --- | --- | --- |
-| $s_0=\text{prompt}$<br>
-
-<br>("教我造核弹") | $V(s_0)=-5$ | $r_0=0$ | -- | $a_0=\text{"我"}$ | $V^{targ}_0 \approx \hat{A}_0+V(s_0)=-2$ |
-| $s_1=\text{prompt}+a_0$<br>
-
-<br>("教我造核弹"+"我") | $V(s_1)=-2$ | $r_1=0$ | $\hat{A}_0 \approx V(s_1)-V(s_0) =+3$ | $a_1=\text{"不"}$ | $V^{targ}_1 \approx \hat{A}_1+V(s_1)=+8$ |
-| $s_2=\text{prompt}+a_0,a_1$<br>
-
-<br>("教我造核弹"+"我不") | $V(s_2)=+8$ | $r_2=0$ | $\hat{A}_1 \approx V(s_2)-V(s_1) =+10$ | $a_2=\text{"能"}$ | $V^{targ}_2 \approx \hat{A}_2+V(s_2)=+10$ |
-| $s_3=\text{prompt}+a_0,a_1,a_2$<br>
-
-<br>("教我造核弹"+"我不能") | $V(s_3)=0$ | $r_3=+10$ | $\hat{A}_2 \approx r_3-V(s_2) =+2$ | $a_3=$ <EOS> | -- |
+| 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $`\hat{A}_t \approx r_t + V(s_{t+1}) - V(s_t)`$ | 动作 $a_t$ | $V^{trag}_t \approx \hat{A}_t + V(s_t)$（反推） |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| $s_0 = \text{prompt}$ <br> （“教我造核弹”） | $V(s_0) = -5$ | $r_0 \approx 0$ | -- | $a_0 = \text{“我”}$ | $V^{trag}_0 \approx \hat{A}_0 + V(s_0) = -2$ |
+| $s_1 = \text{prompt} + a_0$ <br> （“教我造核弹” + “我”） | $V(s_1) = -2$ | $r_1 \approx 0$ | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ | $V^{trag}_1 \approx \hat{A}_1 + V(s_1) = +8$ |
+| $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造核弹” + “我不”） | $V(s_2) = +8$ | $r_2 \approx 0$ | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ | $V^{trag}_2 \approx \hat{A}_2 + V(s_2) = +10$ |
+| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | $V(s_3) = 0$ | $r_3 \approx +10$ | $\hat{A}_2 \approx r_3 - V(s_2) = +2$ | $a_3 = $`EOS` | -- |
 
 #### 1.4 训练设计
 `for iteration = 1, 2, ... do`：训练迭代
 
 （数据收集阶段）
 * `for actor = 1, 2, ..., N do`：同时输入 $N$个prompt
-* `Run policy... for T timesteps`：用当前的旧策略 $\theta_{\text{old}}$ 在环境里运行 $T$ 步，收集数据（状态、动作、奖励）。
-*   `Compute advantage estimates`：用 GAE 方法计算这批数据中每一步的优势值 $\hat{A}_t$。
+* `Run policy for T timesteps`：用当前的旧策略 $\pi_{\theta_{\text{old}}}$ 在环境里运行 $T$ 步，收集数据（状态、动作、奖励）
+*   `Compute advantage estimates`：计算这批数据中每一步的优势值 $\hat{A}_t$
 
 （模型优化阶段）
-* 将收集的 $N \times T$ 个数据打包。
+* 将收集的 $N \times T$ 个数据打包
 * 使用 Minibatch SGD/Adam 根据目标函数反复训练 $K$ 个 Epoch
-* 把更新后的参数 $\theta$ 赋值给 $\theta_{\text{old}}$，准备进入下一轮循环。
+* 把更新后的参数 $\theta$ 赋值给 $\theta_{\text{old}}$，准备进入下一轮循环
 
 ##二、模型实践
