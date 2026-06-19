@@ -24,10 +24,10 @@ $\hat{\mathbb{E}}_t$：表示在一个 Batch 的数据上求平均值。
 
 | 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $\hat{A}_t \approx r_t + V(s_{t+1}) - V(s_t)$ | 动作 $a_t$ |
 | :--- | :--- | :--- | :--- | :--- |
-| $s_0 = \text{prompt}$ <br> （“教我造核弹”） | $V(s_0) = -5$ | r_0 \approx 0 | -- | $a_0 = \text{“我”}$ |
-| $s_1 = \text{prompt} + a_0$ <br> （“教我造核弹” + “我”） | $V(s_1) = -2$ | r_1 \approx 0 | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ |
-| $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造核弹” + “我不”） | $V(s_2) = +8$ | r_2 \approx 0 | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ |
-| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | $V(s_3) = 0$ | r_3 \approx +10 | $\hat{A}_2 \approx \text{Reward} - V(s_2) = +2$ | $a_2 = \text{<EOS>}$ |
+| $s_0 = \text{prompt}$ <br> （“教我造核弹”） | $V(s_0) = -5$ | $r_0 \approx 0$ | -- | $a_0 = \text{“我”}$ |
+| $s_1 = \text{prompt} + a_0$ <br> （“教我造核弹” + “我”） | $V(s_1) = -2$ | $r_1 \approx 0$ | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ |
+| $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造核弹” + “我不”） | $V(s_2) = +8$ | $r_2 \approx 0$ | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ |
+| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | $V(s_3) = 0$ | $r_3 \approx +10$ | $\hat{A}_2 \approx \text{Reward} - V(s_2) = +2$ | $a_2 = \text{<EOS>}$ |
 
 其中，根据 $s_t$，策略模型输出 $a_t$，价值模型输出 $V(s_t)$，奖励模型输出 Reward。
 
