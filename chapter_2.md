@@ -24,10 +24,10 @@ $\hat{\mathbb{E}}_t$：表示在一个 Batch 的数据上求平均值。
 
 | 状态 $s_t$ | 状态价值 $V(s_t)$ | 最终得分 Reward | 优势函数 $\hat{A}_t$ | 动作 $a_t$ |
 | :--- | :--- | :--- | :--- | :--- |
-| $s_0 = \text{prompt}$ <br> （“教我造炸弹”） | $V(s_0) = -5$ | -- | -- | $a_0 = \text{“我”}$ |
-| $s_1 = \text{prompt} + a_0$ <br> （“教我造炸弹” + “我”） | $V(s_1) = -2$ | -- | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ |
-| $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造炸弹” + “我不”） | $V(s_2) = +8$ | -- | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ |
-| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造炸弹” + “我不能”） | -- | +10 | $\hat{A}_2 \approx \text{Reward} - V(s_2) = +2$ | -- |
+| $s_0 = \text{prompt}$ <br> （“教我造核弹”） | $V(s_0) = -5$ | -- | -- | $a_0 = \text{“我”}$ |
+| $s_1 = \text{prompt} + a_0$ <br> （“教我造核弹” + “我”） | $V(s_1) = -2$ | -- | $\hat{A}_0 \approx V(s_1) - V(s_0) = +3$ | $a_1 = \text{“不”}$ |
+| $s_2 = \text{prompt} + a_0, a_1$ <br> （“教我造核弹” + “我不”） | $V(s_2) = +8$ | -- | $\hat{A}_1 \approx V(s_2) - V(s_1) = +10$ | $a_2 = \text{“能”}$ |
+| $s_3 = \text{prompt} + a_0, a_1, a_2$ <br> （“教我造核弹” + “我不能”） | -- | +10 | $\hat{A}_2 \approx \text{Reward} - V(s_2) = +2$ | -- |
 
 其中，根据 $s_t$，策略模型输出 $a_t$，价值模型输出 $V(s_t)$，奖励模型输出 Reward。
 
@@ -104,11 +104,26 @@ $$
 
 $L^{CLIP}(\theta)$：策略目标，负责优化策略模型。
 
-$- c_1 L^{VF}(\theta)$：价值损失，价值模型预测的价值 $V_\theta(s_t)$ 与真实回报 $V_t^{\text{targ}}$ 之间的均方误差 (MSE)。
+$- c_1 L^{VF}(\theta)$：价值损失，价值模型预测的价值 $V_(s_t)$ 与真实回报 $V_t^{\text{targ}}$ 之间的均方误差 (MSE)。
 
 $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布的熵，越大则策略越随机。此项是为了鼓励探索，防止模型过早陷入局部最优。
 
-优势函数通常使用 GAE (广义优势估计)，先计算 TD Error（时序差分误差） $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$，然后用一个衰减系数 $(\gamma\lambda)$ 把所有的 TD Error 加权求和。
+举个例子，
+
+| 状态 $s_t$ | 价值 $V(s_t)$ | 奖励 $r_t$ | 优势函数 $\hat{A}_t \approx r_t+V(s_{t+1})-V(s_t)$ | 动作 $a_t$ | 倒推 $V^{targ}_t \approx \hat{A}_t+V(s_t)$ |
+| --- | --- | --- | --- | --- | --- |
+| $s_0=\text{prompt}$<br>
+
+<br>("教我造核弹") | $V(s_0)=-5$ | $r_0=0$ | -- | $a_0=\text{"我"}$ | $V^{targ}_0 \approx \hat{A}_0+V(s_0)=-2$ |
+| $s_1=\text{prompt}+a_0$<br>
+
+<br>("教我造核弹"+"我") | $V(s_1)=-2$ | $r_1=0$ | $\hat{A}_0 \approx V(s_1)-V(s_0) =+3$ | $a_1=\text{"不"}$ | $V^{targ}_1 \approx \hat{A}_1+V(s_1)=+8$ |
+| $s_2=\text{prompt}+a_0,a_1$<br>
+
+<br>("教我造核弹"+"我不") | $V(s_2)=+8$ | $r_2=0$ | $\hat{A}_1 \approx V(s_2)-V(s_1) =+10$ | $a_2=\text{"能"}$ | $V^{targ}_2 \approx \hat{A}_2+V(s_2)=+10$ |
+| $s_3=\text{prompt}+a_0,a_1,a_2$<br>
+
+<br>("教我造核弹"+"我不能") | $V(s_3)=0$ | $r_3=+10$ | $\hat{A}_2 \approx r_3-V(s_2) =+2$ | $a_3=$ <EOS> | -- |
 
 #### 1.4 训练设计
 `for iteration = 1, 2, ... do`：训练迭代
