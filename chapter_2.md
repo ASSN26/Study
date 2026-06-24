@@ -134,11 +134,11 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 #### 2.1 背景问题
 **基于人类反馈的强化学习（RLHF）的典型流程包括：**
 
-监督微调（SFT）：在高质量数据上对预训练模型进行监督学习。
+监督微调（SFT）：在高质量数据上对语言模型进行监督学习。
 
-偏好采样与奖励建模：从 SFT 模型中采样生成问答对，并让人类标注偏好，然后训练一个奖励模型来拟合这些偏好。
+奖励建模：从 SFT 模型中采样生成问答对，并让人类标注偏好，然后训练一个奖励模型来拟合这些偏好。
 
-强化学习微调：使用奖励模型对 SFT 模型进行微调，以最大化奖励值，同时限制模型与原始模型的偏差。
+强化学习：使用奖励模型对 SFT 模型进行微调，以最大化奖励值，同时限制模型与原始模型的偏差。
 
 **然而，RLHF 存在一些问题：**
 
@@ -149,7 +149,41 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 需要大量的超参数调整，计算成本高。
 
 #### 2.2 解决方法
+本文提出了一种新的方法：直接偏好优化（DPO）。DPO 通过将奖励模型参数化为语言模型的函数，从而可以基于纯语言模型进行训练，直接从偏好数据中提取最优策略，避免了显式的奖励建模。
+
+<img width="580" height="116" alt="image" src="study/images/chapter_2/dpo_1.png" />
+
 #### 2.3 模型结构
+(1)定义
+
+偏好程度： $y_w \succ y_l$， $y_1 \succ y_2$
+
+奖励模型： $\pi_r$，初始化为 $\pi^{SFT}$
+
+策略模型： $\pi_\theta$，初始化为 $\pi^{SFT}$
+
+参考模型： $\pi_{ref}$，就是 $\pi^{SFT}$
+
+(2)奖励建模阶段（训练 $\pi_r$）
+
+$$\mathcal{L}_R(\pi_r, \mathcal{D}) = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[ \log \sigma (\pi_r(x, y_w) - \pi_r(x, y_l)) \right]$$
+
+(3)强化学习阶段（训练 $\pi_\theta$）
+
+(3.1)奖励函数为 $r(x, y) = \pi_r(x, y) - \beta (\log \pi_\theta(y \mid x) - \log \pi_{\text{ref}}(y \mid x))$
+
+(3.2)由 A.1 推导得 $r(x, y) = \beta \log \frac{\pi_r(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)$
+
+(3.3)带入到 BT 模型的最优策略 $`\pi^*`$ 满足的偏好分布 $`p^*`$ 得
+
+$`p^*(y_1 \succ y_2 \mid x) = \sigma(r^*(x, y_1) - r^*(x, y_2)) = \sigma \left( \beta \log \frac{\pi^*(y_1 \mid x)}{\pi_{\text{ref}}(y_1 \mid x)} - \beta \log \frac{\pi^*(y_2 \mid x)}{\pi_{\text{ref}}(y_2 \mid x)} \right)`$
+
+(3.4)DPO将奖励模型 $\pi_r$参数化为策略模型 $\pi_\theta$的函数，最优时 $`\pi^*_r = \pi^*_\theta = \pi^*`$
+
+通过最大化偏好数据的似然优化 $\pi_\theta$，得到目标函数
+
+$$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = \mathbb{E}_{(x, y_w, y_l) \sim D} [\log p^*(y_w \succ y_l \mid x)] = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} \right) \right]$$
+
 #### 2.4 训练设计
 
 ##二、模型实践
