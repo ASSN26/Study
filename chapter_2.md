@@ -191,5 +191,7 @@ $`p^*(y_1 \succ y_2 \mid x) = \sigma(r^*(x, y_1) - r^*(x, y_2)) = \sigma \left( 
 $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_1, y_2) \sim \mathcal{D}} [\log p^*(y_1 \succ y_2 \mid x)] = -\mathbb{E}_{(x, y_1, y_2) \sim \mathcal{D}} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_1 \mid x)}{\pi_{\text{ref}}(y_1 \mid x)} - \beta \log \frac{\pi_\theta(y_2 \mid x)}{\pi_{\text{ref}}(y_2 \mid x)} \right) \right]$$
 
 #### 2.4 训练设计
+* 构建偏好数据集：对于每个提示 $x$，利用参考模型 $\pi_{\text{ref}}$ 采样出不同的回答，并进行人类偏好标注，从而构建离线偏好数据集 $\mathcal{D}$。
+* 优化策略模型：在给定的参考模型 $\pi_{\text{ref}}$、数据集 $\mathcal{D}$ 以及控制偏离程度的超参数 $\beta$ 的条件下，优化目标模型 $\pi_\theta$ 以最小化 $\mathcal{L}_{\text{DPO}}$。
 
 ##二、模型实践
