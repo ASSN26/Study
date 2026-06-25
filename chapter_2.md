@@ -156,7 +156,7 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 #### 2.3 模型结构
 (1)定义：偏好程度 $y_1 \succ y_2$，奖励模型 $r_\phi$ 初始化为 $\pi^{SFT}$，策略模型 $\pi_\theta$ 初始化为 $\pi^{SFT}$，参考模型 $\pi_{ref}$ 就是 $\pi^{SFT}$。
 
-(2)RHLF典型流程：
+(2)RHLF典型流程
 
 奖励建模训练 $r_\phi$： $`\mathcal{L}_R(r_\phi, \mathcal{D}) = -\mathbb{E}_{(x, y_1, y_2) \sim \mathcal{D}} \left[ \log \sigma (r_\phi(x, y_1) - r_\phi(x, y_2)) \right]`$
 
