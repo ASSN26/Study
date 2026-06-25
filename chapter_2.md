@@ -154,33 +154,39 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 <img width="580" height="116" alt="image" src="study/images/chapter_2/dpo_1.png" />
 
 #### 2.3 模型结构
-(1)定义
+(1)定义：偏好程度 $y_1 \succ y_2$，奖励模型 $r_\phi$ 初始化为 $\pi^{SFT}$，策略模型 $\pi_\theta$ 初始化为 $\pi^{SFT}$，参考模型 $\pi_{ref}$ 就是 $\pi^{SFT}$。
 
-偏好程度： $y_w \succ y_l$， $y_1 \succ y_2$
+(2)RHLF典型流程：
 
-奖励模型： $\pi_r$，初始化为 $\pi^{SFT}$
+奖励建模训练 $r_\phi$： $`\mathcal{L}_R(r_\phi, \mathcal{D}) = -\mathbb{E}_{(x, y_1, y_2) \sim \mathcal{D}} \left[ \log \sigma (r_\phi(x, y_1) - r_\phi(x, y_2)) \right]`$
 
-策略模型： $\pi_\theta$，初始化为 $\pi^{SFT}$
+强化学习训练 $\pi_\theta$：$`r(x, y) = r_\phi(x, y) - \beta (\log \pi_\theta(y \mid x) - \log \pi_{\text{ref}}(y \mid x))`$
 
-参考模型： $\pi_{ref}$，就是 $\pi^{SFT}$
+得到的最优策略满足偏好分布 $`p^*(y_1 \succ y_2 \mid x) = \sigma(r^*(x, y_1) - r^*(x, y_2))`$
 
-(2)奖励建模阶段（训练 $\pi_r$）
+(3)DPO做了什么
 
-$$\mathcal{L}_R(\pi_r, \mathcal{D}) = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[ \log \sigma (\pi_r(x, y_w) - \pi_r(x, y_l)) \right]$$
+(3.1)
 
-(3)强化学习阶段（训练 $\pi_\theta$）
+目的：避免显示的奖励建模 $r_\phi$。
 
-(3.1)奖励函数为 $r(x, y) = \pi_r(x, y) - \beta (\log \pi_\theta(y \mid x) - \log \pi_{\text{ref}}(y \mid x))$
+方法：直接计算 $`r^*(x, y)`$ 的解析解。
 
-(3.2)由 A.1 推导得 $r(x, y) = \beta \log \frac{\pi_r(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)$
+具体：由 A.1 推导得 $`r^*(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)`$，从而避免了建模 $r_\phi$。
 
-(3.3)带入到 BT 模型的最优策略 $`\pi^*`$ 满足的偏好分布 $`p^*`$ 得
+(3.2)
+
+目的：避免强化学习流程。
+
+方法：直接通过最大似然 $`p^*`$ 来优化 $\pi_\theta$。
+
+具体：将 $`r^*(x, y)`$ 带入到 $`p^*`$ 得
 
 $`p^*(y_1 \succ y_2 \mid x) = \sigma(r^*(x, y_1) - r^*(x, y_2)) = \sigma \left( \beta \log \frac{\pi^*(y_1 \mid x)}{\pi_{\text{ref}}(y_1 \mid x)} - \beta \log \frac{\pi^*(y_2 \mid x)}{\pi_{\text{ref}}(y_2 \mid x)} \right)`$
 
-(3.4)DPO将奖励模型 $\pi_r$参数化为策略模型 $\pi_\theta$的函数，最优时 $`\pi^*_r = \pi^*_\theta = \pi^*`$
+最大似然时， $`\pi \rightarrow \pi^*`$
 
-通过最大化偏好数据的似然优化 $\pi_\theta$，得到目标函数
+(3.3)综上，DPO 的目标函数为
 
 $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = \mathbb{E}_{(x, y_w, y_l) \sim D} [\log p^*(y_w \succ y_l \mid x)] = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} \right) \right]$$
 
