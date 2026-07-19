@@ -89,7 +89,7 @@ $\hat{A}_t<0$且 $r_t(\theta)>1+\epsilon$不为常数，从而确保更新<br>
 
 > 展示了随着策略更新步长的增加，各个目标函数的变化。可以观察到，红线（ $L^{CLIP}$）始终处于橙线（ $L^{CPI}$）的下方。当更新步长过大导致 KL 散度（蓝线）飙升时， $L^{CLIP}$ 会迅速转为下降，从而阻止更新幅度过大。
 
-#### 1.3 模型结构
+#### 1.3 方法详情
 在深度强化学习中，通常使用 Actor-Critic 架构。Actor 即策略模型 $\pi_\theta(a_t | s_t)$，Critic 即价值模型 $V(s_t)$。
 
 为了节省算力和显存，实际通常让策略模型和价值模型共享神经网络的底层参数，只在最后一层分出两个头分别输出概率分布和价值评分。
@@ -153,7 +153,7 @@ $+ c_2 S \left[ \pi_\theta \right] (s_t)$：熵奖励， $S$ 代表策略分布�
 
 <img width="580" height="116" alt="image" src="study/images/chapter_2/dpo_1.png" />
 
-#### 2.3 模型结构
+#### 2.3 方法详情
 (1)定义：偏好程度 $y_w \succ y_l$，奖励模型 $r_\phi$ 用 $\pi^{SFT}$ 初始化，策略模型 $\pi_\theta$ 用 $\pi^{SFT}$ 初始化，参考模型 $\pi_{ref}$ 就是 $\pi^{SFT}$。
 
 (2)RHLF典型流程
@@ -204,7 +204,7 @@ $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w,
 
 (2)基于 Qwen-VL-Chat，通过 DPO 来构建 Silkie 模型。
 
-#### 3.3 方法流程
+#### 3.3 方法详情
 (1)VLFeedback 数据集的构建
 
 <img width="580.8" height="280" alt="image" src="study/images/chapter_2/Silkie_1.png" />
