@@ -290,7 +290,7 @@ $`r_t = r_\varphi(q, o_{\le t}) - \beta \log \frac{\pi_\theta(o_t \vert{} q, o_{
 为了解决上述问题，本文提出群组相对策略优化（GRPO）。GRPO 不需要额外的价值模型作为基准，而是将（对同一问题的多个采样输出的）平均奖励作为基准。
 
 #### 4.3 方法详情
-具体来说，对于每个问题 $q$，GRPO 从旧策略 $\pi_{\theta_{\text{old}}}$ 采样得到一组输出 $`{o_1,o_2, …, o_G}`$，然后通过最大化以下目标来优化策略模型：
+具体来说，对于每个问题 $q$，GRPO 从旧策略 $\pi_{\theta_{\text{old}}}$ 采样得到一组输出 ${o_1,o_2, …, o_G}$，然后通过最大化以下目标来优化策略模型：
 
 $`\begin{aligned} \mathcal{J}_{GRPO}(\theta) = & \mathbb{E}\left[q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(O\vert{}q)\right] \\ & \frac{1}{G} \sum_{i=1}^G \frac{1}{\vert{}o_i\vert{}} \sum_{t=1}^{\vert{}o_i\vert{}} \left\{ \min \left[ \frac{\pi_\theta(o_{i,t}\vert{}q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}\vert{}q, o_{i,<t})} \hat{A}_{i,t}, \text{clip}\left( \frac{\pi_\theta(o_{i,t}\vert{}q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}\vert{}q, o_{i,<t})}, 1 - \varepsilon, 1 + \varepsilon \right) \hat{A}_{i,t} \right] - \beta \mathbb{D}_{KL} \left[\pi_\theta \parallel \pi_{ref}\right] \right\} \end{aligned}`$
 
