@@ -270,5 +270,55 @@ $$\mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w,
 
 #### 3.4 训练设计
 
+### 4. GRPO（Group Relative Policy Optimization）
+#### 4.1 背景问题
+PPO 通过最大化以下代理目标函数来优化 LLM：
+
+$`\mathcal{J}_{PPO}(\theta) = \mathbb{E}[q \sim P(Q), o \sim \pi_{\theta_{\text{old}}}(O\vert{}q)] \frac{1}{\vert{}o\vert{}} \sum_{t=1}^{\vert{}o\vert{}} \min \left[ \frac{\pi_\theta(o_t\vert{}q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t\vert{}q, o_{<t})} A_t, \text{clip}\left( \frac{\pi_\theta(o_t\vert{}q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t\vert{}q, o_{<t})}, 1 - \varepsilon, 1 + \varepsilon \right) A_t \right]`$
+
+其中， $\pi_{\theta}$ 和 $\pi_{\theta_{\text{old}}}$ 分别表示当前和旧的策略模型， $q$ 是从问题数据集采样的问题， $o$ 是从旧策略 $\pi_{\theta_{\text{old}}}$ 采样得到的输出， $\epsilon$ 是 PPO 引入的裁剪超参数， $A_t$ 是优势值，通过广义优势估计（GAE），基于奖励 ${r_{≥t}}$ 和价值模型 $V$ 来计算。
+
+此外，为了减轻过度优化，标准方法是在每个 token 的奖励中添加一个来自参考模型的 KL 惩罚项，避免和参考模型输出的 token 分布差异过大：
+
+$`r_t = r_\varphi(q, o_{\le t}) - \beta \log \frac{\pi_\theta(o_t \vert{} q, o_{<t})}{\pi_{ref}(o_t \vert{} q, o_{<t})}`$
+
+其中， $r_{\phi}$ 是奖励模型， $\pi_{ref}$ 是参考模型， $\beta$ 是 KL 惩罚项的系数。
+
+由于 PPO 使用的价值模型通常与策略模型规模相当，这会带来大量的内存和计算负担。此外，价值模型作为基准来计算优势值，但在 LLM 上下文中，通常只有最后一个 token 会被奖励模型分配奖励分数，这可能会使得训练一个在每个 token 上都准确的价值模型变得复杂。
+
+#### 4.2 解决方法
+为了解决上述问题，本文提出群组相对策略优化（GRPO）。GRPO 不需要额外的价值模型作为基准，而是将（对同一问题的多个采样输出的）平均奖励作为基准。
+
+#### 4.3 方法详情
+具体来说，对于每个问题 $q$，GRPO 从旧策略 $\pi_{\theta_{\text{old}}}$ 采样得到一组输出 $`{o_1,o_2, …, o_G}`$，然后通过最大化以下目标来优化策略模型：
+
+$`\begin{aligned} \mathcal{J}_{GRPO}(\theta) = & \mathbb{E}\left[q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(O\vert{}q)\right] \\ & \frac{1}{G} \sum_{i=1}^G \frac{1}{\vert{}o_i\vert{}} \sum_{t=1}^{\vert{}o_i\vert{}} \left\{ \min \left[ \frac{\pi_\theta(o_{i,t}\vert{}q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}\vert{}q, o_{i,<t})} \hat{A}_{i,t}, \text{clip}\left( \frac{\pi_\theta(o_{i,t}\vert{}q, o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}\vert{}q, o_{i,<t})}, 1 - \varepsilon, 1 + \varepsilon \right) \hat{A}_{i,t} \right] - \beta \mathbb{D}_{KL} \left[\pi_\theta \parallel \pi_{ref}\right] \right\} \end{aligned}`$
+
+值得注意的是，GRPO 没有在奖励中添加 KL 惩罚项，而是通过直接在损失函数中添加训练策略和参考策略之间的 KL 散度来进行正则化，避免了因计算 KL 导致的 $\hat{A}_{i,t}$ 计算复杂化。
+
+#### 4.4 训练设计
+(1)使用 GRPO 的结果监督强化学习
+对于每个问题 $q$，从旧的策略模型 $\pi_{\theta_{\text{old}}}$ 采样得到一组输出 ${o_1,o_2, …, o_G}$。然后，使用奖励模型对这些输出进行评分，得到 $G$ 个奖励： ${r_1,r_2, …, r_G}$。随后，通过减去组平均值并除以组标准差进行归一化。结果监督仅在每个输出 $o_i$ 结束时提供奖励，并将归一化奖励设置为输出中所有 token 的优势值，即：
+
+$$\hat{A}_{i,t} = \tilde{r}_i = \frac{r_i - \text{mean}(r)}{\text{std}(r)}$$
+
+然后，通过最大化 $J_{GRPO}$ 来优化策略。
+
+(2)使用 GRPO 的过程监督强化学习
+给定问题 $q$ 和 $G$ 个采样输出 ${o_1,o_2, …, o_G}$，使用过程奖励模型对每个步骤的输出进行评分，得到对应的奖励：
+
+$`R = \{ \{ r_1^{\text{index}(1)}, \dots, r_1^{\text{index}(K_1)} \}, \dots, \{ r_G^{\text{index}(1)}, \dots, r_G^{\text{index}(K_G)} \} \}`$
+
+其中， $\text{index}(j)$ 表示第 $j$ 步的结束标记索引， $K_i$ 是第 $i$ 个输出中的总步数。
+
+对这些奖励进行归一化：
+
+$$\tilde{r}_i^{\text{index}(j)} = \frac{r_i^{\text{index}(j)} - \text{mean}(R)}{\text{std}(R)}$$
+
+随后，过程监督计算每个标记的优势值，作为该标记后续所有奖励的归一化和，即：
+
+$$\hat{A}_{i,t} = \sum_{\text{index}(j) \ge t} \tilde{r}_i^{\text{index}(j)}$$
+
+然后，通过最大化 $J_{GRPO}$ 来优化策略。
 
 ##二、模型实践
